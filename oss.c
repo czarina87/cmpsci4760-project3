@@ -187,6 +187,21 @@ void launchWorkerWithDynamicArgs(int upperTimeLimit)
     }
 }
 
+void logProcessTable(FILE *fp)
+{
+    if (fp != NULL)
+    {
+        fprintf(fp, "OSS PID:%d SysClockS: %d SysclockNano: %d\n", getpid(), sim_clock->seconds, sim_clock->nanoseconds);
+        fprintf(fp, "Process Table:\n");
+        fprintf(fp, "Entry\tOccupied\tPID\tStartS\tStartN\n");
+        for (int i = 0; i < MAX_PROCESSES; i++)
+        {
+            fprintf(fp, "%d\t%d\t%d\t%d\t%d\n", i, processTable[i].occupied, processTable[i].pid, processTable[i].startSeconds, processTable[i].startNano);
+        }
+        fflush(fp); // Ensure the log is written immediately
+    }
+}
+
 // Function prototypes
 void setupMessageQueue();
 void incrementClock();
@@ -211,6 +226,7 @@ int main(int argc, char *argv[])
     int timelimit = 0;
     int interval = 0;
     char *logfile = NULL;
+    long lastLogTime = 0;
 
     int c; /* command line options */
     while ((c = getopt_long(argc, argv, "hn:s:t:i:f:", long_options, NULL)) != -1)
@@ -275,12 +291,13 @@ int main(int argc, char *argv[])
 
     int activeChildren = 0; // Number of currently active children
 
-    FILE *fp;
+    FILE *fp = NULL;
     if (logfile != NULL)
     {
         fp = fopen(logfile, "w");
         if (fp == NULL)
         {
+            // Log to stderr if file opening fails
             fprintf(stderr, "Error opening logfile\n");
             return 1;
         }
@@ -304,7 +321,7 @@ int main(int argc, char *argv[])
 
     while (createdProcesses < numProc || activeChildren > 0)
     {
-        long currentTime = getCurrentTimeMillis(); // You'll need to implement this function based on your clock
+        long currentTime = getCurrentTimeMillis();
         if (activeChildren < simul && createdProcesses < numProc && (currentTime - lastLaunchTime >= interval))
         {
             for (int i = 0; i < MAX_PROCESSES; i++)
@@ -321,7 +338,13 @@ int main(int argc, char *argv[])
         }
 
         // Increment simulated clock based on active children
-        incrementSimulatedClock(activeChildren); // Implement this to suit your clock simulation
+        incrementSimulatedClock(activeChildren);
+
+        if (currentTime - lastLogTime >= 500)
+        {                              // More than half a second has passed
+            logProcessTable(fp);       
+            lastLogTime = currentTime; 
+        }
 
         // Non-blocking wait to check for any child process termination
         int status;
@@ -338,14 +361,19 @@ int main(int argc, char *argv[])
                 }
             }
         }
+
+        
         // Minor delay to prevent this loop from consuming too much CPU
-        usleep(10000); // Adjust as necessary to balance responsiveness with CPU usage
+        usleep(10000); 
     }
 
     // Cleanup and termination logic
     cleanupAndExit(0); // Directly invoke the cleanup handler
     // close the file
-    fclose(fp);
+    if (fp != NULL)
+    {
+        fclose(fp); // Close the log file when done
+    }
 
     return 0;
 }

@@ -308,15 +308,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // Initial process table display
-    printf("OSS PID:%d SysClockS: %d SysclockNano: %d\n", getpid(), 0, 0);
-    printf("Process Table:\n");
-    printf("Entry\tOccupied\tPID\tStartS\tStartN\n");
-    for (int i = 0; i < MAX_PROCESSES; i++)
-    {
-        printf("%d\t%d\t%d\t%ld\t%ld\n", i, processTable[i].occupied, processTable[i].pid, (long int)processTable[i].startSeconds, (long int)processTable[i].startNano);
-    }
-
     int createdProcesses = 0; // Track the number of created processes
 
     while (createdProcesses < numProc || activeChildren > 0)
@@ -335,6 +326,15 @@ int main(int argc, char *argv[])
                     break;                        // Exit the for-loop after launching one process
                 }
             }
+        }
+
+        // process table display
+        printf("OSS PID:%d SysClockS: %d SysclockNano: %d\n", getpid(), 0, 0);
+        printf("Process Table:\n");
+        printf("Entry\tOccupied\tPID\tStartS\tStartN\n");
+        for (int i = 0; i < MAX_PROCESSES; i++)
+        {
+            printf("%d\t%d\t%d\t%ld\t%ld\n", i, processTable[i].occupied, processTable[i].pid, (long int)processTable[i].startSeconds, (long int)processTable[i].startNano);
         }
 
         // Increment simulated clock based on active children

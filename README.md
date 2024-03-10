@@ -1,17 +1,8 @@
 https://github.com/czarina87/cmpsci4760-project3
 
-OSS and Worker Application
+##OSS and Worker Application##
 Overview
 This application simulates an operating system scheduler (OSS) managing worker processes. The OSS executable launches worker processes at specified intervals, controls their execution time, and logs their activity. The system uses inter-process communication (IPC) through message queues, allowing OSS and workers to exchange messages.
-
-Features
-Dynamic Process Management: Launches and manages a specified number of worker processes.
-Simulated Clock: Implements a simulated system clock that increments based on the number of active children.
-Inter-Process Communication: Utilizes message queues for communication between the OSS and worker processes.
-Signal Handling: Gracefully handles termination signals (SIGINT) and timeout (SIGALRM) to ensure proper cleanup.
-Logging: Logs all OSS activities to both the console and a specified log file.
-Installation
-Clone the repository to your local machine:
 
 bash
 Copy code
@@ -19,13 +10,8 @@ git clone https://github.com/your-repository/oss-worker-app.git
 cd oss-worker-app
 Compile the application using gcc:
 
-bash
-Copy code
-gcc -o oss oss.c -lrt
-gcc -o worker worker.c -lrt
-Note: -lrt is used for linking the real-time library, necessary for message queue operations.
-
 Usage
+first run `make` to compile the executables
 The application is invoked with the oss executable, followed by command-line options to customize its behavior:
 
 bash
